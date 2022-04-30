@@ -13,3 +13,9 @@
 /* Stop purging. */
 
 /* Your own custom utilities */
+
+@layer base {
+  html {
+    font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+  }
+}
