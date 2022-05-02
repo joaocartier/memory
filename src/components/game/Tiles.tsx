@@ -1,29 +1,77 @@
-import { GridSize } from "components/game/NewGame";
+import { Transition } from "@headlessui/react";
+import { ResultMap } from "components/game/Game";
+import { Grid } from "components/game/useGame";
 import React from "react";
 
 interface TilesProps {
-  size: GridSize;
+  grid: Grid;
+  columns: number;
+  result: ResultMap;
+  onOpen: (tile: string) => void;
 }
 
-function Tile() {
+export type TileStatus = "closed" | "open" | "revealed" | "peak";
+
+interface TileProps {
+  status: TileStatus;
+  value: string;
+  onOpen: (tile: string) => void;
+}
+
+const Tile = React.memo(({ status = "closed", value, onOpen }: TileProps) => {
+  console.log("Rendering tile", value, status);
   return (
-    <button className="w-24 h-24 rounded-full bg-primary-600 focus-visible:ring-4 focus-visible:ring-accent outline-none"></button>
+    <button
+      onClick={() => onOpen(value)}
+      className={`transition w-16 h-16 lg:w-24 lg:h-24 rounded-full 
+      ${
+        status === "peak"
+          ? "bg-accent"
+          : status === "closed"
+          ? "bg-primary-600"
+          : "bg-secondary"
+      } 
+      focus-visible:ring-4 ${
+        status === "peak"
+          ? "focus-visible:ring-primary"
+          : "focus-visible:ring-accent"
+      } outline-none text-white font-bold`}
+    >
+      <Transition
+        show={status !== "closed"}
+        enter="transition-opacity duration-75"
+        enterFrom="opacity-0"
+        enterTo="opacity-100"
+        leave="transition-opacity duration-150"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
+      >
+        {value}
+      </Transition>
+    </button>
   );
-}
+});
 
-export default function Tiles({ size }: TilesProps) {
-  const rows = Number(size[0]);
-  const cols = Number(size[2]);
+function Tiles({ grid, columns, result, onOpen }: TilesProps) {
   return (
     <div
-      className="grid grid-cols-4 gap-4"
+      className="grid gap-4"
       style={{
-        gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
       }}
     >
-      {new Array(rows * cols).fill(1).map((tile, idx) => {
-        return <Tile key={idx} />;
+      {grid.map((el, idx) => {
+        return (
+          <Tile
+            onOpen={() => onOpen(el.value)}
+            key={idx}
+            status={result[el.value]}
+            value={el.value}
+          />
+        );
       })}
     </div>
   );
 }
+
+export default React.memo(Tiles);
