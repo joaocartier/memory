@@ -58,14 +58,14 @@ function Game() {
             onOpen={toggleTile}
           />
         </div>
-        <div>
-          <div>
-            <span>Time</span>
-            <span>0:00</span>
+        <div className="flex items-center justify-center gap-x-8">
+          <div className="flex items-center justify-between gap-x-16 px-6 py-4 rounded-lg bg-primary-100">
+            <span className="font-bold text-secondary-900">Time</span>
+            <span className="font-bold text-primary-600 text-2xl">0:00</span>
           </div>
-          <div>
-            <span>Moves</span>
-            <span>0</span>
+          <div className="flex items-center justify-between gap-x-20 px-6 py-4 rounded-lg bg-primary-100">
+            <span className="font-bold text-secondary-900">Moves</span>
+            <span className="font-bold text-primary-600 text-2xl">0</span>
           </div>
         </div>
       </div>
