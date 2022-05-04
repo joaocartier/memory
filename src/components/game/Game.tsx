@@ -1,7 +1,7 @@
 import { GridSize, GRID_SIZES } from "components/game/NewGame";
 import Tiles, { TileStatus } from "components/game/Tiles";
 import useGame from "components/game/useGame";
-import React, { useState } from "react";
+import React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 export type Value = string;
@@ -22,13 +22,6 @@ function Game() {
     .map((_, i) => `${i + 1}`);
 
   const { grid, result, toggleTile } = useGame(values, gridSize);
-
-  /**
-   * Build a map ->
-   *               array
-   * Res map     ->
-   *               value: found
-   */
 
   return (
     <div className="bg-white h-screen">

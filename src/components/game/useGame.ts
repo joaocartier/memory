@@ -32,7 +32,7 @@ export default function useGame(values: Value[], gridSize: GridSize) {
     (tile: string) => {
       let updatedResult = { ...result };
       let status = updatedResult[tile];
-      console.log({ status });
+
       switch (status) {
         case "closed":
           updatedResult[tile] = "peak";
