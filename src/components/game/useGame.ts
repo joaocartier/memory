@@ -1,53 +1,87 @@
-import { ResultMap, Value } from "components/game/Game";
+import { ITile } from "components/game/Game";
 import { GridSize } from "components/game/NewGame";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-export type Grid = { value: string; status: string }[];
+const MATCH_NEEDED_COUNT = 2;
+const DEFAULT_DELAY = 500;
 
-export default function useGame(values: Value[], gridSize: GridSize) {
-  const [grid, setGrid] = useState<Grid | null>(null);
-  const initialResult = useMemo(
+export default function useGame(initialTiles: ITile[], gridSize: GridSize) {
+  const [tiles, setTiles] = useState([...initialTiles]);
+  const [selectedTiles, setSelectedTiles] = useState<number[]>([]);
+  const isGameOver = useMemo(
     () =>
-      values.reduce(function (map: ResultMap, obj) {
-        map[obj] = "closed";
-        return map;
-      }, {}),
-    [values]
+      tiles.filter((tile) => tile.status === "revealed").length ===
+      initialTiles.length,
+    [tiles, initialTiles.length]
   );
+
+  if (isGameOver) {
+    alert("Game Over!");
+  }
+
+  const handleMatchTiles = useCallback(
+    (indexes: number[]) => {
+      setTimeout(() => {
+        setSelectedTiles([]);
+
+        let updatedTiles = [...tiles];
+        for (const i of indexes) {
+          updatedTiles[i].status = "revealed";
+        }
+        setTiles(updatedTiles);
+      }, DEFAULT_DELAY);
+    },
+    [tiles]
+  );
+
+  const handleCloseTiles = useCallback(
+    (indexes: number[]) => {
+      setTimeout(() => {
+        setSelectedTiles([]);
+        let updatedTiles = [...tiles];
+        for (const i of indexes) {
+          updatedTiles[i].status = "closed";
+        }
+        setTiles(updatedTiles);
+      }, DEFAULT_DELAY);
+    },
+    [tiles]
+  );
+
+  /**
+   * useEffect when a tile is pushed to the selected
+   * Check if it's the last one (selected.length === MATCH_NEEDED_COUNT)
+   * setTimeout to perform state update
+   */
 
   useEffect(() => {
-    if (!grid) {
-      setGrid(
-        [...values, ...values]
-          .sort(() => Math.random() - 0.5)
-          .map((el) => ({ value: el, status: "closed" }))
-      );
-    }
-    console.log({ grid });
-  }, [grid, values]);
+    if (selectedTiles.length === 0) return;
 
-  const [result, setResult] = useState<ResultMap>(initialResult);
-
-  const toggleTile = useCallback(
-    (tile: string) => {
-      let updatedResult = { ...result };
-      let status = updatedResult[tile];
-
-      switch (status) {
-        case "closed":
-          updatedResult[tile] = "peak";
-          break;
-        case "peak":
-          updatedResult[tile] = "open";
-          break;
-        default:
-          break;
+    if (selectedTiles.length === MATCH_NEEDED_COUNT) {
+      let value = tiles[selectedTiles[0]].value;
+      if (selectedTiles.every((v) => tiles[v].value === value)) {
+        handleMatchTiles(selectedTiles);
+      } else {
+        handleCloseTiles(selectedTiles);
       }
+    }
+  }, [
+    selectedTiles.length,
+    selectedTiles,
+    tiles,
+    handleMatchTiles,
+    handleCloseTiles,
+  ]);
 
-      setResult(updatedResult);
-    },
-    [result]
-  );
+  const toggleTile = (index: number) => {
+    if (selectedTiles.length >= MATCH_NEEDED_COUNT) return;
+    if (selectedTiles.includes(index)) return;
+    if (tiles[index].status !== "closed") return;
+    setSelectedTiles([...selectedTiles, index]);
+    let updatedTiles = [...tiles];
+    updatedTiles[index].status = "peak";
+    setTiles(updatedTiles);
+  };
 
-  return { result, toggleTile, grid };
+  return { tiles, toggleTile, isGameOver };
 }

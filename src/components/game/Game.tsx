@@ -6,6 +6,11 @@ import { Link, useSearchParams } from "react-router-dom";
 
 export type Value = string;
 export type ResultMap = Record<string, TileStatus>;
+export interface ITile {
+  status: TileStatus;
+  value: string;
+  id: number;
+}
 
 function Game() {
   const [searchParams] = useSearchParams();
@@ -21,7 +26,11 @@ function Game() {
     .fill(0)
     .map((_, i) => `${i + 1}`);
 
-  const { grid, result, toggleTile } = useGame(values, gridSize);
+  const initialTiles: ITile[] = [...values, ...values]
+    .sort(() => Math.random() - 0.5)
+    .map((v, idx) => ({ status: "closed", value: v, id: idx }));
+
+  const { tiles, toggleTile } = useGame(initialTiles, gridSize);
 
   return (
     <div className="bg-white h-screen">
@@ -44,12 +53,7 @@ function Game() {
           </div>
         </div>
         <div className="flex items-center justify-center">
-          <Tiles
-            grid={grid || []}
-            columns={cols}
-            result={result}
-            onOpen={toggleTile}
-          />
+          <Tiles tiles={tiles} columns={cols} onOpen={toggleTile} />
         </div>
         <div className="flex items-center justify-center gap-x-8">
           <div className="flex items-center justify-between gap-x-16 px-6 py-4 rounded-lg bg-primary-100">
